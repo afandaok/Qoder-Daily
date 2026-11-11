@@ -1144,10 +1144,12 @@ def pick_daily_campaign(rows):
     return claimed_target, claimed_target is not None
 
 
-def claim_campaign(account, campaign_id):
-    headers = minimal_sash_headers(account["access"])
+def claim_campaign(account, campaign_id, uid=""):
+    # claim 必须与活动列表用同一套风控头：只发最小四件套时，国际版返回
+    # HTTP 409 CAMPAIGN_CLAIM_PRECONDITION_FAILED。请求体也需为 JSON 对象。
+    headers, _risk_note = risky_sash_headers(account, uid or account.get("uid", ""))
     return request("POST", "%s%s/%s/claim" % (account["base"], CAMPAIGNS_PATH, campaign_id),
-                   headers=headers, body=None)
+                   headers=headers, body={})
 
 
 def do_checkin(account):
